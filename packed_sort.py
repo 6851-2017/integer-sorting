@@ -1,5 +1,7 @@
 # jamb 2017
 
+import math
+
 N = 16
 b = 4  # log n
 W = 40 # TODO should be (b+1)*b*logb*2
@@ -32,7 +34,10 @@ def split_word(word):
 
 # merge a pair of half-full words with sorted elems into a full word
 def bitonic_pair_merge(word1, word2):
-    pass
+    word = reverse_word(word2) + word1  # / / -> \/
+    for step in range(int(math.log2(W//(b+1))+0.0001)): #added epsilon for floating error
+        word = bitonic_step(word, step)
+    return word
     
 # flip order of input word's elements and return it
 def reverse_word(word):
@@ -49,7 +54,6 @@ def reverse_helper(word, m):
     for i in range(W//(m*2)):
         repeater = repeater << (m*2)
         repeater += 1
-    
     firstmask = (((1<<m) - 1)<<m)*repeater
     secondmask = ((1<<m) - 1)*repeater
     result = ((word & secondmask) << m) + ((word & firstmask) >> m)
@@ -58,18 +62,32 @@ def reverse_helper(word, m):
     return result
 
 
-    
-
 # input: word to operate on, which step to do (i.e. first step works with the two halves,
 #   nth step works with the two halves of each 1/2^n of the word); requires it to have all
 #   previous steps done and be bitonic at that level
-# output: word that has elements swapped so that in each 1/2^{step_size} of the word, the
+# output: word that has elements swapped so that in each 1/2^{step} of the word, the
 #   first half has the smaller half of the elements, and they're still bitonic
-def bitonic_step(word, step_size):
-    pass
-
-
-
+def bitonic_step(word, step):
+    m = W//(2*2**step)  # chunk size
+    repeater = 0
+    for i in range(W//(m*2)):
+        repeater = repeater << (m*2)
+        repeater += 1
+    firstmask = (((1<<m) - 1)<<m)*repeater
+    secondmask = ((1<<m) - 1)*repeater
+    topline = (word & firstmask) >> m
+    bottomline = (word & secondmask)
+    diff = topline - bottomline
+    diffmask = 0
+    for i in range(W//(b+1)):
+        diffmask = diffmask << (b+1)
+        diffmask += 1
+    A_bits = (diff & diffmask)*((1 << (b+1))-1)  # & this with A
+    B_bits = ~A_bits
+    larger = (topline & A_bits) + (bottomline & B_bits)
+    smaller = (topline & B_bits) + (bottomline & A_bits)
+    return (larger << m)+smaller
+    
 
 
 
@@ -83,6 +101,23 @@ def basic_tests():
     print_nicely(word)
     print ("reversed: ")
     print_nicely(reverse_word(word))
+    print("bitonic step:")
+    print_nicely(bitonic_step(word, 1))
+    print("-----------")
+    word1 = 0
+    for elem in [2, 3, 7, 15]:
+        word1 = word1 << b+1
+        word1 += elem
+    word2 = 0
+    for elem in [0, 6, 8, 12]:
+        word2 = word2 << b+1
+        word2 += elem
+    print("word1:")
+    print_nicely(word1)
+    print("word2:")
+    print_nicely(word2)
+    print("sorted:")
+    print_nicely(bitonic_pair_merge(word1, word2))
 
 
 def print_nicely(word):
