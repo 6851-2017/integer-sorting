@@ -1,5 +1,8 @@
 # jamb 2017
 
+N = 16
+b = 4  # log n
+W = 40 # TODO should be (b+1)*b*logb*2
 
 
 # input: list of elems to sort
@@ -42,3 +45,30 @@ def reverse_word(word):
 #   first half has the smaller half of the elements, and they're still bitonic
 def bitonic_step(word, step_size):
     pass
+
+
+
+
+
+def basic_tests():
+    elems = [3, 7, 2, 15, 0, 8, 6, 12]  # all fit in one word
+    word = 0
+    for elem in elems:
+        word = word << b+1
+        word += elem
+    print_nicely(word)
+
+
+def print_nicely(word):
+    # words are formatted as element values separated by underscored
+    out = ""
+    for i in range(0, W//(b+1)):
+        nextb = word % 2**b
+        word = word >> b+1           
+        next_out = "_" + str(nextb)
+        out = next_out + out
+    print(out)
+
+
+
+basic_tests()
