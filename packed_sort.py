@@ -68,67 +68,36 @@ def reverse_helper(word, m):
 # output: word that has elements swapped so that in each 1/2^{step} of the word, the
 #   first half has the smaller half of the elements, and they're still bitonic
 def bitonic_step(word, step):
-    print("STEP %s %d" % (format_nicely(word), step))
     m = W//(2*2**step)  # chunk size
     repeater = 0
     for i in range(W//(m*2)):
         repeater = repeater << (m*2)
         repeater += 1
-    print("REPEATER %s" % (format_binary(repeater)))
     diffmask = 0
     for i in range(W//(b+1)):
         diffmask = diffmask << (b+1)
         diffmask += 1
     diffmask = diffmask << b
-    print("DIFFMASK %s" % (format_binary(diffmask)))
     
     firstmask = (((1<<m) - 1)<<m)*repeater
-    print("FIRSTMASK %s" % (format_binary(firstmask)))
     secondmask = ((1<<m) - 1)*repeater
-    print("SECONDMASK %s" % (format_binary(secondmask)))
-    print("WORD %s" % (format_binary(word)))
     topline = (word & firstmask) >> m
     topline = diffmask | topline
-    print("TOPLINE %s" % (format_binary(topline)))
     bottomline = (word & secondmask)
-    print("BOTLINE %s" % (format_binary(bottomline)))
     diff = topline - bottomline
-    print("DIFLINE %s" % (format_binary(diff)))
     topline = topline & ~diffmask
-    print("TOPLINE %s" % (format_binary(topline)))
     
     A_bits = ((diff & diffmask) >> b)*((1 << (b+1))-1)  # & this with A
-    print("DIFF & DIFFMASK %s" % (format_binary(diff & diffmask)))
-    print("A_BITS %s" % (format_binary(A_bits)))
     B_bits = ~A_bits
-    print("B_bits %s" % (format_binary(B_bits)))
     smaller = (topline & B_bits) + (bottomline & A_bits)
-    print("SMALLER %s" % (format_binary(smaller)))
     larger = (topline & A_bits) + (bottomline & B_bits)
-    print("LARGER %s" % (format_binary(larger)))
     return (smaller << m) + larger
     
 
 
 
 def basic_tests():
-    elems = [3, 7, 2, 15, 0, 8, 6, 12]  # all fit in one word
-    word = 0
-    for elem in elems:
-        word = word << b+1
-        word += elem
-    print("original word: ")
-    print_nicely(word)
-    print ("reversed: ")
-    print_nicely(reverse_word(word))
-    print("bitonic step:")
-    word = bitonic_step(word, 2)
-    print_nicely(word)
-##    word = bitonic_step(word, 1)
-##    print_nicely(word)
-##    word = bitonic_step(word, 2)
-##    print_nicely(word)
-    print("-----------")
+    # elems = [3, 7, 2, 15, 0, 8, 6, 12]  # all fit in one word
     word1 = 0
     for elem in [2, 3, 7, 15]:
         word1 = word1 << b+1
@@ -137,12 +106,12 @@ def basic_tests():
     for elem in [0, 6, 8, 12]:
         word2 = word2 << b+1
         word2 += elem
-##    print("word1:")
-##    print_nicely(word1)
-##    print("word2:")
-##    print_nicely(word2)
-##    print("sorted:")
-##    print_nicely(bitonic_pair_merge(word1, word2))
+    print("word1:")
+    print_nicely(word1)
+    print("word2:")
+    print_nicely(word2)
+    print("sorted:")
+    print_nicely(bitonic_pair_merge(word1, word2))
 
 
 def print_nicely(word):
