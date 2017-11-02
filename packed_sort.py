@@ -22,10 +22,46 @@ def packed_sort(elems):
 def base_case_merge(elems):
     pass
 
-# input: list of words with sorted elems
-# output: list of words with sorted elems such that the whole thing is sorted
-def merge_lists(words):
-    pass
+def get_last_element(word):
+    mask = (1 << b) - 1
+    elt = word & mask
+
+# input: two lists of words with sorted elems in sorted order, each word only half full
+# output: list of words with sorted elems such that the whole thing is sorted, each word only half full
+def merge_lists(wordlist1, wordlist2):
+    it1 = 0
+    it2 = 0
+    wordlist = []
+    while True:
+        if it1 >= len(wordlist1):
+            if it2 >= len(wordlist2):
+                break
+            wordlist.append(wordlist2[it2])
+            it2 += 1
+        if it2 >= len(wordlist2):
+            wordlist.append(wordlist1[it1])
+            it1 += 1
+        else:
+            word1 = wordlist1[it1]
+            word2 = wordlist2[it2]
+            word = bitonic_pair_merge(word1, word2)
+            (w1, w2) = split_word(word)
+            wordlist.append(w1)
+            biggest = get_last_element(w2)
+            if biggest == get_last_element(word1):
+                # we put the larger of the word pair back onto list 1
+                wordlist1[it1] = w2
+                it2 += 1
+            elif biggest == get_last_element(word2):
+                # we put the larger of the word pair back onto list 2
+                wordlist2[it2] = w2
+                it1 += 1
+            else:
+                # it should've been in one of the lists...
+                raise ValueError("Where did this value come from?!")
+            
+    return wordlist
+        
 
 # input: word with sorted elems
 # output: two first-half-empty words, containing the first and second halves of elements
@@ -101,12 +137,13 @@ def bitonic_step(word, step):
 
 def basic_tests():
     # elems = [3, 7, 2, 15, 0, 8, 6, 12]  # all fit in one word
+    # TESTING BITONIC_PAIR_MERGE
     word1 = 0
-    for elem in [2, 3, 7, 15]:
+    for elem in [1, 3, 4, 5]:
         word1 = word1 << b+1
         word1 += elem
     word2 = 0
-    for elem in [0, 6, 8, 12]:
+    for elem in [0, 1, 4, 6]:
         word2 = word2 << b+1
         word2 += elem
     print("word1:")
@@ -119,6 +156,25 @@ def basic_tests():
     w1, w2 = split_word(word)
     print_nicely(w1)
     print_nicely(w2)
+
+    word3 = 0
+    for elem in [6, 6, 8, 9]:
+        word3 = word3 << b+1
+        word3 += elem
+    word4 = 0
+    for elem in [11, 12, 14, 15]:
+        word4 = word4 << b+1
+        word4 += elem
+    # TESTING MERGE_LISTS
+    list1 = [word1, word3, word4]
+    list2 = [word2, word4]
+    print("LIST1")
+    print([format_nicely(x) for x in list1])
+    print("LIST2")
+    print([format_nicely(x) for x in list2])
+    list_merge = merge_lists(list1, list2)
+    print("MERGE")
+    print([format_nicely(x) for x in list_merge])
 
 
 def print_nicely(word):
