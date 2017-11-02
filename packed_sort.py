@@ -30,7 +30,10 @@ def merge_lists(words):
 # input: word with sorted elems
 # output: two first-half-empty words, containing the first and second halves of elements
 def split_word(word):
-    pass
+    first = word >> (W//2)
+    sec_and = (1 << (W//2)) - 1
+    second = word & sec_and
+    return first, second
 
 # merge a pair of half-full words with sorted elems into a full word
 def bitonic_pair_merge(word1, word2):
@@ -111,7 +114,11 @@ def basic_tests():
     print("word2:")
     print_nicely(word2)
     print("sorted:")
-    print_nicely(bitonic_pair_merge(word1, word2))
+    word = bitonic_pair_merge(word1, word2)
+    print_nicely(word)
+    w1, w2 = split_word(word)
+    print_nicely(w1)
+    print_nicely(w2)
 
 
 def print_nicely(word):
