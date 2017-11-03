@@ -10,21 +10,63 @@ W = 40 # TODO should be (b+1)*b*logb*2
 # input: list of elems to sort
 # output: sorted list of them
 def packed_sort(elems):
+    if len(elems) == 0:
+        return []
     # pack into large words via word-level mergesort
-    base_case_merge()
+    words = base_case_merge(elems)
+    
     # recursively merge sorted lists of words into twice-as-large lists
-    merge_lists()
+    list_of_word_lists = [[x] for x in words]
+    while len(list_of_word_lists) > 1:
+        l = len(list_of_word_lists)//2
+        next_list = []
+        for i in range(l):
+            list1 = list_of_word_lists[2*i]
+            list2 = list_of_word_lists[2*i+1]
+            next_list.append(merge_lists(list1, list2))
+        if l % 2 == 1:
+            next_list.append(list_of_word_lists[-1])
+        list_of_word_lists = next_list
+        
     # extract from the words back into a list
-    pass
+    wordlist = list_of_word_lists[0]
+    sorted_elems = []
+    mask = (1 << (b+1)) - 1
+    for word in wordlist:
+        for i in range(W//(b+1)):
+            sorted_elems.append(word & mask)
+            word >> (b+1)
+    return sorted_elems
 
 # input: list of elems to sort
 # output: list of words with sorted elems packed into them
 def base_case_merge(elems):
-    # TODO replace this with something actually efficient; for now I'm working with small words so roughly constant
+    # TODO replace this with something actually efficient;
+    # for now I'm working with small words so roughly constant to just manually sort
     index = 0
+    elems_per_word = W//2//(b+1)
+    words = []
+    next_word = []
     for elem in elems:
-        pass
-    pass
+        next_word.append(elem)
+        index += 1
+        if (index % elems_per_word == 0):
+            word = sorted(next_word)
+            word_val = 0
+            for x in word:
+                word_val = word_val << (b+1)
+                word_val += x
+            words.append(word_val)
+            next_word = []
+    if (index % elems_per_word != 0):
+            word = sorted(next_word)
+            word_val = 0
+            for x in word:
+                word_val = word_val << (b+1)
+                word_val += x
+            words.append(word_val)
+
+    return words
 
 def get_last_element(word):
     mask = (1 << b) - 1
@@ -43,7 +85,7 @@ def merge_lists(wordlist1, wordlist2):
                 break
             wordlist.append(wordlist2[it2])
             it2 += 1
-        if it2 >= len(wordlist2):
+        elif it2 >= len(wordlist2):
             wordlist.append(wordlist1[it1])
             it1 += 1
         else:
@@ -180,6 +222,16 @@ def basic_tests():
     list_merge = merge_lists(list1, list2)
     print("MERGE")
     print([format_nicely(x) for x in list_merge])
+
+    # TESTING BASE CASE MERGE
+    print("\nTESTING BASE CASE MERGE")
+    vals = [0, 5, 1, 3, 6, 2, 7, 4, 3, 6, 7, 11, 13, 9]
+    res = base_case_merge(vals)
+    for x in res:
+        print_nicely(x)
+
+    # TESTING PACKED SORT
+    print(packed_sort(vals))
 
 
 def print_nicely(word):
