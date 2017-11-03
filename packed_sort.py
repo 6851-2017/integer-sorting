@@ -14,28 +14,36 @@ def packed_sort(elems):
         return []
     # pack into large words via word-level mergesort
     words = base_case_merge(elems)
+    print("words:", [format_nicely(x) for x in words])
     
     # recursively merge sorted lists of words into twice-as-large lists
     list_of_word_lists = [[x] for x in words]
+    next_list = []
+    
     while len(list_of_word_lists) > 1:
         l = len(list_of_word_lists)//2
-        next_list = []
+        print("lists:", [[format_nicely(x) for x in w] for w in list_of_word_lists])
         for i in range(l):
             list1 = list_of_word_lists[2*i]
             list2 = list_of_word_lists[2*i+1]
             next_list.append(merge_lists(list1, list2))
-        if l % 2 == 1:
+        if len(list_of_word_lists) % 2 == 1:
             next_list.append(list_of_word_lists[-1])
         list_of_word_lists = next_list
-        
+        next_list = []
+
+    print("lists:", [[format_nicely(x) for x in w] for w in list_of_word_lists])
+
     # extract from the words back into a list
     wordlist = list_of_word_lists[0]
     sorted_elems = []
     mask = (1 << (b+1)) - 1
     for word in wordlist:
-        for i in range(W//(b+1)):
-            sorted_elems.append(word & mask)
-            word >> (b+1)
+        els = []
+        for i in range(W//(b+1)//2):
+            els.append(word & mask)
+            word = word >> (b+1)
+        sorted_elems.extend(els[::-1])
     return sorted_elems
 
 # input: list of elems to sort
@@ -231,6 +239,7 @@ def basic_tests():
         print_nicely(x)
 
     # TESTING PACKED SORT
+    print("\nTESTING PACKED SORT")
     print(packed_sort(vals))
 
 
