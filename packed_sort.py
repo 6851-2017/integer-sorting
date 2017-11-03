@@ -20,11 +20,16 @@ def packed_sort(elems):
 # input: list of elems to sort
 # output: list of words with sorted elems packed into them
 def base_case_merge(elems):
+    # TODO replace this with something actually efficient; for now I'm working with small words so roughly constant
+    index = 0
+    for elem in elems:
+        pass
     pass
 
 def get_last_element(word):
     mask = (1 << b) - 1
     elt = word & mask
+    return elt
 
 # input: two lists of words with sorted elems in sorted order, each word only half full
 # output: list of words with sorted elems such that the whole thing is sorted, each word only half full
